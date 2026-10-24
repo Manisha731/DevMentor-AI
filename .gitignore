@@ -218,3 +218,26 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# ---- DevMentor AI additions ----
+
+# Secrets (only .env.example is committed)
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Frontend
+node_modules/
+.vite/
+coverage/
+# the Python template ignores every lib/ folder; keep the frontend one
+!frontend/src/lib/
+
+# Local data (ChromaDB if run embedded, Postgres dumps)
+chroma_data/
+*.dump
+
+# OS / editor junk
+.DS_Store
+Thumbs.db
