@@ -1,15 +1,27 @@
+import logging
 import secrets
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from sqlalchemy import text
 from starlette.middleware.sessions import SessionMiddleware
 
-from app import auth, repos
+from app import auth, poller, repos
 from app.chroma import get_client
 from app.config import settings
 from app.db import engine
 
-app = FastAPI(title="DevMentor AI")
+logging.basicConfig(level=logging.INFO, format="%(levelname)s:  %(name)s: %(message)s")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    poller.start()
+    yield
+    poller.stop()
+
+
+app = FastAPI(title="DevMentor AI", lifespan=lifespan)
 app.add_middleware(
     SessionMiddleware,
     secret_key=settings.session_secret or secrets.token_urlsafe(32),

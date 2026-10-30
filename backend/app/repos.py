@@ -138,3 +138,37 @@ def disconnect_repo(repo_id: int, auth=Depends(require_user), db: Session = Depe
     repo.sync_status = "disconnected"  # stop polling later, keep commits and findings
     db.commit()
     return {"status": "disconnected", "id": repo_id}
+
+
+@router.post("/{repo_id}/poll")
+def poll_now(repo_id: int, auth=Depends(require_user), db: Session = Depends(get_db)):
+    """Poll one repo right now (for testing and demos) instead of waiting for the scheduler."""
+    from app.poller import poll_one
+
+    user, _ = auth
+    repo = db.get(Repo, repo_id)
+    if repo is None or repo.user_id != user.id or repo.sync_status == "disconnected":
+        raise HTTPException(404, "Repo not found")
+    return poll_one(db, repo_id)
+
+
+@router.get("/{repo_id}/commits")
+def repo_commits(repo_id: int, auth=Depends(require_user), db: Session = Depends(get_db)):
+    from app.models import Commit
+
+    user, _ = auth
+    repo = db.get(Repo, repo_id)
+    if repo is None or repo.user_id != user.id or repo.sync_status == "disconnected":
+        raise HTTPException(404, "Repo not found")
+    rows = db.scalars(select(Commit).where(Commit.repo_id == repo_id).order_by(Commit.id.desc()).limit(50)).all()
+    return [
+        {
+            "id": c.id,
+            "sha": c.sha[:7],
+            "message": (c.message or "").splitlines()[0] if c.message else "",
+            "author": c.author,
+            "committed_at": c.committed_at,
+            "analyzed_at": c.analyzed_at,
+        }
+        for c in rows
+    ]
