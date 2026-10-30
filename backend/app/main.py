@@ -1,10 +1,23 @@
+import secrets
+
 from fastapi import FastAPI
 from sqlalchemy import text
+from starlette.middleware.sessions import SessionMiddleware
 
+from app import auth
 from app.chroma import get_client
+from app.config import settings
 from app.db import engine
 
 app = FastAPI(title="DevMentor AI")
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=settings.session_secret or secrets.token_urlsafe(32),
+    same_site="lax",
+    https_only=False,  # local dev only; becomes True once served over HTTPS (Phase 14)
+    max_age=14 * 24 * 3600,
+)
+app.include_router(auth.router)
 
 
 @app.get("/health")

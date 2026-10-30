@@ -5,3 +5,6 @@ alembic
 psycopg[binary]
 pydantic-settings
 chromadb-client==1.0.0
+cryptography
+itsdangerous
+httpx
