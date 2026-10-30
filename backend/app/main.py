@@ -6,7 +6,7 @@ from fastapi import FastAPI
 from sqlalchemy import text
 from starlette.middleware.sessions import SessionMiddleware
 
-from app import auth, poller, repos
+from app import analysis, auth, poller, repos
 from app.chroma import get_client
 from app.config import settings
 from app.db import engine
@@ -31,6 +31,7 @@ app.add_middleware(
 )
 app.include_router(auth.router)
 app.include_router(repos.router)
+app.include_router(analysis.router)
 
 
 @app.get("/health")
