@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from sqlalchemy import text
 from starlette.middleware.sessions import SessionMiddleware
 
-from app import auth
+from app import auth, repos
 from app.chroma import get_client
 from app.config import settings
 from app.db import engine
@@ -18,6 +18,7 @@ app.add_middleware(
     max_age=14 * 24 * 3600,
 )
 app.include_router(auth.router)
+app.include_router(repos.router)
 
 
 @app.get("/health")
